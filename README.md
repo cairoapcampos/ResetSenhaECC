@@ -2,7 +2,9 @@
 
 Pagina estatica para redefinicao de senha via Supabase, pronta para deploy na Vercel.
 
-![Pagina de redefinicao de senha](docs/img.png)
+<p align="center">
+  <img src="docs/img.png" alt="Pagina de redefinicao de senha">
+</p>
 
 ## Deploy na Vercel
 
