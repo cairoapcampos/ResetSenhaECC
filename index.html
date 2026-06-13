@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EuColecionoCards - Redefinir Senha</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+
+<body>
+    <div class="card" id="reset-card">
+        <img src="/logo.png" alt="Logo" class="logo">
+        <h2>Nova Senha</h2>
+        <p>Crie uma senha forte com no mínimo 10 caracteres.</p>
+
+        <div class="input-group">
+            <label for="password">NOVA SENHA</label>
+            <input type="password" id="password" placeholder="Digite sua nova senha">
+            <div class="strength-meter">
+                <div id="strength-bar" class="strength-bar"></div>
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label for="confirm-password">CONFIRMAR SENHA</label>
+            <input type="password" id="confirm-password" placeholder="Repita a senha">
+        </div>
+
+        <button id="btn-update" onclick="handleUpdate()" disabled>ATUALIZAR SENHA</button>
+
+        <div id="message"></div>
+
+        <footer class="footer">
+            <hr>
+            <p>&copy; 2026 EuColecionoCards. Todos os direitos reservados.</p>
+        </footer>
+    </div>
+
+    <div class="card" id="success-card" style="display: none;">
+        <div style="font-size: 3rem; color: #2ecc71; margin-bottom: 1rem;">✓</div>
+        <h2>Senha Atualizada!</h2>
+        <p>Sua senha foi alterada com sucesso. Você já pode voltar para o aplicativo e fazer login.</p>
+        <button onclick="window.close()">FECHAR PÁGINA</button>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://vhnevjgkactedhjuaoou.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZobmV2amdrYWN0ZWRoanVhb291Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwMDM4ODUsImV4cCI6MjA5MDU3OTg4NX0.Av4JiXqdv_E_ECXqrUAvKlGq9wuw63LDmZQLBL383f0';
+
+        const passInput = document.getElementById('password');
+        const confirmInput = document.getElementById('confirm-password');
+        const btnUpdate = document.getElementById('btn-update');
+        const strBar = document.getElementById('strength-bar');
+        const messageDiv = document.getElementById('message');
+
+        // Validação em tempo real
+        const validate = () => {
+            const p = passInput.value;
+            const cp = confirmInput.value;
+
+            // Medidor de força
+            let strength = 0;
+            if (p.length >= 10) strength += 40;
+            if (/[A-Z]/.test(p)) strength += 20;
+            if (/[0-9]/.test(p)) strength += 20;
+            if (/[^A-Za-z0-9]/.test(p)) strength += 20;
+
+            strBar.style.width = strength + '%';
+            if (strength < 40) strBar.style.backgroundColor = '#e74c3c';
+            else if (strength < 80) strBar.style.backgroundColor = '#f1c40f';
+            else strBar.style.backgroundColor = '#2ecc71';
+
+            // Habilita botão
+            btnUpdate.disabled = !(p.length >= 10 && p === cp);
+
+            if (cp && p !== cp) {
+                messageDiv.innerText = "As senhas não coincidem";
+                messageDiv.className = "error";
+            } else {
+                messageDiv.innerText = "";
+            }
+        };
+
+        passInput.addEventListener('input', validate);
+        confirmInput.addEventListener('input', validate);
+
+        async function handleUpdate() {
+            const password = passInput.value;
+
+            // Pega o token da URL
+            const hash = window.location.hash.substring(1);
+            const params = new URLSearchParams(hash || window.location.search);
+            const accessToken = params.get('access_token');
+
+            if (!accessToken) {
+                messageDiv.innerText = "Erro: Link inválido ou expirado.";
+                messageDiv.className = "error";
+                return;
+            }
+
+            btnUpdate.disabled = true;
+            btnUpdate.innerText = "ATUALIZANDO...";
+
+            try {
+                const response = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'apikey': SUPABASE_ANON_KEY,
+                        'Authorization': `Bearer ${accessToken}`
+                    },
+                    body: JSON.stringify({ password: password })
+                });
+
+                if (response.ok) {
+                    document.getElementById('reset-card').style.display = 'none';
+                    document.getElementById('success-card').style.display = 'block';
+                } else {
+                    const err = await response.json();
+                    messageDiv.innerText = "Erro: " + (err.msg || "Falha no servidor.");
+                    messageDiv.className = "error";
+                    btnUpdate.disabled = false;
+                    btnUpdate.innerText = "ATUALIZAR SENHA";
+                }
+            } catch (e) {
+                messageDiv.innerText = "Erro de conexão. Tente novamente.";
+                messageDiv.className = "error";
+                btnUpdate.disabled = false;
+            }
+        }
+    </script>
+</body>
+
+</html>
