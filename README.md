@@ -2,6 +2,8 @@
 
 Pagina estatica para redefinicao de senha via Supabase, pronta para deploy na Vercel.
 
+![Pagina de redefinicao de senha](docs/img.png)
+
 ## Deploy na Vercel
 
 1. Envie estes arquivos para um repositorio GitHub, GitLab ou Bitbucket.
