@@ -1,4 +1,4 @@
-# EuColecionoCards Web
+# Página de Redefinição de Senha do EuColecionoCards Mobile V2
 
 Pagina estatica para redefinicao de senha via Supabase, pronta para deploy na Vercel.
 
